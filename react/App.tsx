@@ -1,27 +1,30 @@
 import React from "react";
-import "./App.css";
-import Logo from "./components/Logo";
-import Api from "./components/Api";
+import { ThemeProvider } from "styled-components";
+import {
+  BrowserRouter as Router,
+  Route,
+  RouteProps,
+  Switch,
+} from "react-router-dom";
+
+import themes from "./services/themes";
+import GlobalStyle from "./components/Layout/GlobalStyle";
+import screens from "./screens";
+
+import "remixicon/fonts/remixicon.css";
 
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <Logo />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <Api />
-      </header>
-    </div>
+    <ThemeProvider theme={themes.dark}>
+      <GlobalStyle />
+      <Router>
+        <Switch>
+          {screens.map((routeProps: RouteProps, index: number) => (
+            <Route key={index} {...routeProps} />
+          ))}
+        </Switch>
+      </Router>
+    </ThemeProvider>
   );
 };
 
