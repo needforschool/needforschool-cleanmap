@@ -1,4 +1,17 @@
 const Encore = require('@symfony/webpack-encore');
+const dotenv = require('dotenv-flow');
+
+Encore
+    .configureDefinePlugin(options => {
+        const env = dotenv.config({
+            default_node_env: "development",
+        });
+        dotenv
+            .listDotenvFiles(".", process.env.NODE_ENV)
+            .forEach((file) => console.log(`loaded env from ${file}`));
+        if (env.error) throw env.error;
+        options['process.env'].MAPBOX_TOKEN = JSON.stringify(env.parsed.MAPBOX_TOKEN);
+    })
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -68,6 +81,6 @@ Encore
 
     // uncomment if you're having problems with a jQuery plugin
     //.autoProvidejQuery()
-;
+    ;
 
 module.exports = Encore.getWebpackConfig();
