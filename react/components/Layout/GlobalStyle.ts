@@ -244,4 +244,17 @@ export default createGlobalStyle`
             transform: translateZ(0)
         }
     }
+
+    /* mapbox */
+    .marker:hover {
+        filter: brightness(0.8);
+        cursor: pointer;
+    }
+
+    .mapboxgl-popup-content,
+    .mapboxgl-popup-close-button {
+        color: #000000;
+    }
+
+    
 `;
