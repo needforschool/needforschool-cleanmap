@@ -14,7 +14,7 @@ const Sidebar: React.FC = () => {
   return (
     <Container>
       <Header href={ROUTES.MAP}>
-        <Title>{"Unknow"}</Title>
+        <Title>{"CleanMap"}</Title>
       </Header>
       <Nav>
         <NavItem href={ROUTES.MAP} active={pathname == ROUTES.MAP}>
