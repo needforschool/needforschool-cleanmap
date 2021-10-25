@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MainController extends AbstractController
 {
-    #[Route('/', name: 'main')]
+    #[Route('/{reactRouting}', name: 'main', requirements: ['reactRouting' => ".+"], defaults: ['reactRouting' => null])]
     public function index(): Response
     {
         return $this->render('base.html.twig');
