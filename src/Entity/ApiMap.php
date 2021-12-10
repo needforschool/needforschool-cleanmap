@@ -33,9 +33,19 @@ class ApiMap
     private $flux;
 
     /**
-     * @ORM\Column(type="array")
+     * @ORM\Column(type="float")
      */
-    private $geo_point = [];
+    private $longitude;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $latitude;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $code_barre;
 
     public function getId(): ?int
     {
@@ -78,15 +88,40 @@ class ApiMap
         return $this;
     }
 
-    public function getGeoPoint(): ?array
+    public function getLongitude(): ?float
     {
-        return $this->geo_point;
+        return $this->longitude;
     }
 
-    public function setGeoPoint(array $geo_point): self
+    public function setLongitude(float $longitude): self
     {
-        $this->geo_point = $geo_point;
+        $this->longitude = $longitude;
 
         return $this;
     }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(float $latitude): self
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    public function getCodeBarre(): ?string
+    {
+        return $this->code_barre;
+    }
+
+    public function setCodeBarre(string $code_barre): self
+    {
+        $this->code_barre = $code_barre;
+
+        return $this;
+    }
+
 }

@@ -51,7 +51,7 @@ class ApiController extends AbstractController
         return $response;
     }
     #[Route('/api2', name: 'api_test',  methods: ['GET'])]
-    public function apiGetBen(ApiMapRepository $BenRepository): Response
+    public function apiGetBen(EntityManagerInterface $manager, ApiMapRepository $BenRepository): Response
     {
         $response = new Response();
     
@@ -59,28 +59,50 @@ class ApiController extends AbstractController
         $reponseApi = $httpClient->request('GET', 'https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=points-dapport-volontaire-dechets-et-moyens-techniques&q=&facet=commune&facet=flux&facet=centre_ville&rows=6000&facet=prestataire&facet=zone&facet=pole');
         $content = json_decode($reponseApi->getContent(), true);
         $nbrBenCreated = 0;
-        //Boucler sur le tableau et insérer toutes les régions
         
         foreach ($content["records"] as $BenData) {
-
-            
-               
-                
-                
-                
-                // var_dump($BenData["fields"]);
-                if (!empty($BenData["fields"]["geo_point_2d"]) && !empty($BenData["fields"]["commune"]) && !empty($BenData["fields"]["adresse"]) && !empty($BenData["fields"]["flux"])&& $BenData["fields"]["flux"] == 'Récup\'verre') {
-                    $nbrBenCreated++; 
-                    $apiMap = new ApiMap();
-                    $apiMap->setGeoPoint($BenData["fields"]["geo_point_2d"])
-                ->setCommune($BenData["fields"]["commune"])
-                ->setAdresse($BenData["fields"]["adresse"])
-                ->setFlux($BenData["fields"]["flux"]);
-                $this->entityManager->persist($apiMap);
+            $existingBen = $BenRepository->findOneBy([
+                'code_barre' => $BenData["recordid"],
+            ]);
+        
+            if (empty($existingBen) || is_null($existingBen)) {
+                $ApiMap = new ApiMap();
+                $ApiMap->setCodeBarre($BenData["recordid"]);
+                if (empty($BenData["fields"]["adresse"]) || $BenData["fields"]["adresse"] == '') {
+                    $BenData["fields"]["adresse"] = 'Adresse inconnue';
+                }
+                if (empty($BenData["fields"]["commune"]) || $BenData["fields"]["commune"] == '') {
+                    $BenData["fields"]["commune"] = 'Commune inconnu';
+                }
+                if (empty($BenData["fields"]["flux"]) || $BenData["fields"]["flux"] == '') {
+                    $BenData["fields"]["flux"] = 'Flux inconnu';
+                }
+                if ($BenData["fields"]["flux"] == 'Récup\'verre') {
+                    $ApiMap->setFlux($BenData["fields"]["flux"]);
+                    $ApiMap->setCommune($BenData["fields"]["commune"]);
+                    $ApiMap->setAdresse($BenData["fields"]["adresse"]); 
+                    $ApiMap->setLatitude($BenData["fields"]["geo_point_2d"][0]);
+                    $ApiMap->setLongitude($BenData["fields"]["geo_point_2d"][1]);
+                    $nbrBenCreated++;
+                    $manager->persist($ApiMap);
                 }
                 
-            
+            } else {
+                $apiRecordsID = array_column($content, 'recordid');
+                if (!in_array($existingBen->getCodeBarre(), $apiRecordsID)) {
+                    $manager->remove($existingBen);
+                } else {
+                    if ($existingBen->getLatitude() != $BenData["fields"]["geo_point_2d"][0]) {
+                        $existingBen->setLatitude($BenData["fields"]["geo_point_2d"][0]);
+                    }
+                    if ($existingBen->getLongitude() != $BenData["fields"]["geo_point_2d"][1]) {
+                        $existingBen->setLongitude($$BenData["fields"]["geo_point_2d"][1]);
+                    }
+                }
+            }
         }
+        
+        $manager->flush();
         
         $this->entityManager->flush();
         $response->setStatusCode(Response::HTTP_OK);
@@ -88,4 +110,5 @@ class ApiController extends AbstractController
         
         return $response;
     }
+    
 }
